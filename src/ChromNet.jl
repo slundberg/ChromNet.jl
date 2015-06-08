@@ -1,6 +1,6 @@
 module ChromNet
 
-export window_bed_file!
+export window_bed_file, window_bed_file!
 
 chrNames = [
     "chr1", "chr2", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8",
@@ -24,6 +24,32 @@ end
 # see how long the genome is in bins
 totalBins = int(ceil(sum(chrLengths)/1000))
 
+function window_bed_file(stream)
+	global chrOffsets, totalBins
+
+	# mark all bins that are touched with 1
+	binValues = falses(totalBins)
+	for line in eachline(stream)
+	    parts = split(line)
+	    if haskey(chrOffsets, parts[1])
+	        startPos = ceil((chrOffsets[parts[1]]+int(parts[2]))/1000)
+	        endPos = ceil((chrOffsets[parts[1]]+int(parts[3]))/1000)
+	        for i in startPos:endPos
+	            binValues[i] = 1
+	        end
+	    end
+	end
+
+	binValues
+end
+
+# compute offsets to embed al the chromsomes in a linear sequence
+chrOffsets = Dict{ASCIIString,Int64}()
+for i in 1:length(chrLengths)
+    chrOffsets[chrNames[i]] = sum(chrLengths[1:i-1])
+end
+
+
 # this fills in the columns of the passed matrix from the given stream
 function window_bed_file!(matrix, columnIndex::Int64, stream)
 	global chrOffsets
@@ -40,5 +66,6 @@ function window_bed_file!(matrix, columnIndex::Int64, stream)
 	    end
 	end
 end
+
 
 end
