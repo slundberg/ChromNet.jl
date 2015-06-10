@@ -7,9 +7,9 @@ using GZip
 binValues = GZip.open(window_bed_file, "data/K562_tss.bed.gz")
 
 ## save_chromnet_matrix and load_chromnet_matrix
-M = trues(3,1150)
-M[:,:] = rand(3,1150) .> 0.5
-header = ["A", "B", "C"]
+M = trues(30,100150)
+M[:,:] = rand(30,100150) .> 0.5
+header = ["A" for i in 1:30]
 isfile("data/tmp.BitArray") && rm("data/tmp.BitArray")
 save_chromnet_matrix("data/tmp.BitArray", M, header)
 M2,header2 = load_chromnet_matrix("data/tmp.BitArray")
