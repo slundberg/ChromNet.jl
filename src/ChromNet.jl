@@ -1,6 +1,6 @@
 module ChromNet
 
-export window_bed_file, window_bed_file!
+export window_bed_file, load_chromnet_matrix, save_chromnet_matrix
 
 chrNames = [
     "chr1", "chr2", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8",
@@ -23,14 +23,15 @@ end
 
 # see how long the genome is in bins
 totalBins = int(ceil(sum(chrLengths)/1000))
-
+ 
+# creates a BitArray with a 1 for every bin overlapped by the bed file regions
 function window_bed_file(stream)
 	global chrOffsets, totalBins
 
 	# mark all bins that are touched with 1
 	binValues = falses(totalBins)
 	for line in eachline(stream)
-	    parts = split(line)
+	    parts = split(line, '\t')
 	    if haskey(chrOffsets, parts[1])
 	        startPos = ceil((chrOffsets[parts[1]]+int(parts[2]))/1000)
 	        endPos = ceil((chrOffsets[parts[1]]+int(parts[3]))/1000)
@@ -43,29 +44,42 @@ function window_bed_file(stream)
 	binValues
 end
 
-# compute offsets to embed al the chromsomes in a linear sequence
-chrOffsets = Dict{ASCIIString,Int64}()
-for i in 1:length(chrLengths)
-    chrOffsets[chrNames[i]] = sum(chrLengths[1:i-1])
+function cov_sparse(data::BitArray)
+    N,P = size(data)
+    sumData = sum(data,1);
+    C = zeros(Float64, P, P)
+    for i in 1:P
+        C[:,i] = sum(data[data[:,i],:], 1)
+        if i % 10 == 0
+            println(i)
+        end
+    end
+    C .-= transpose(sumData)*sumData/N
+    C ./= (N-1);
 end
 
-
-# this fills in the columns of the passed matrix from the given stream
-function window_bed_file!(matrix, columnIndex::Int64, stream)
-	global chrOffsets
-
-	# mark all bins that are touched with 1
-	for line in eachline(stream)
-	    parts = split(line)
-	    if haskey(chrOffsets, parts[1])
-	        startPos = int(ceil((chrOffsets[parts[1]]+int(parts[2]))/1000))
-	        endPos = int(ceil((chrOffsets[parts[1]]+int(parts[3]))/1000))
-	        for i in startPos:endPos
-	            matrix[i,columnIndex] = 1
-	        end
-	    end
-	end
+function load_chromnet_matrix(dirName)
+	f = open("$dirName/matrix")
+	N = read(f, Int64)
+	P = read(f, Int64)
+	data = falses(N, P)
+	read!(f, data)
+	close(f)
+	data,vec(readdlm("$dirName/header"))
 end
 
+function save_chromnet_matrix(outDir, data::BitArray{2}, header::Array)
+	@assert size(data)[2] == length(header)
+
+	mkpath(outDir)
+
+	f = open("$outDir/matrix", "w")
+	write(f, size(data)[1])
+    write(f, size(data)[2])
+    write(f, data)
+    close(f)
+
+    writedlm("$outDir/header", header)
+end
 
 end
