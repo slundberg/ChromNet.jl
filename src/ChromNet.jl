@@ -48,12 +48,12 @@ function streaming_cov(stream; chunkSize=100000, quiet=false)
     P = read(stream, Int64)
     N = read(stream, Int64)
     XtX = zeros(Float64, P, P)
-    varSums = zeros(Float64, P)
+    varSums = zeros(Float64, P, 1)
 
     # force the chunk size to line up with 64 bit word boundaries,
     # this is important for loading the BitArray in blocks.
     # we try and keep the size close to what was requested
-    chunkSize = max(int((chunkSize/64)/P),1)*P*64
+    chunkSize = max(int(chunkSize/64),1)*64
     
     # build XtX incrementally and also the totals of every variable.
     chunkBit = BitArray(P, chunkSize)
@@ -76,7 +76,7 @@ function streaming_cov(stream; chunkSize=100000, quiet=false)
     varSums .+= sum(chunk,2)
     
     # convert XtX to a covariance matrix
-    XtX .-= transpose(varSums)*varSums/N
+    XtX .-= varSums*varSums'/N
     XtX ./= (N-1)
 end
 
