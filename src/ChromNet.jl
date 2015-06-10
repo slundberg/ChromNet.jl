@@ -1,6 +1,6 @@
 module ChromNet
 
-export window_bed_file, load_chromnet_matrix, save_chromnet_matrix
+export window_bed_file, load_chromnet_matrix, save_chromnet_matrix, streaming_cov
 
 chrNames = [
     "chr1", "chr2", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8",
@@ -44,32 +44,54 @@ function window_bed_file(stream)
 	binValues
 end
 
-function cov_sparse(data::BitArray)
-    N,P = size(data)
-    sumData = sum(data,1);
-    C = zeros(Float64, P, P)
-    for i in 1:P
-        C[:,i] = sum(data[data[:,i],:], 1)
-        if i % 10 == 0
-            println(i)
-        end
+function streaming_cov(stream; chunkSize=100000, quiet=false)
+    P = read(stream, Int64)
+    N = read(stream, Int64)
+    XtX = zeros(Float64, P, P)
+    varSums = zeros(Float64, P)
+
+    # force the chunk size to line up with 64 bit word boundaries,
+    # this is important for loading the BitArray in blocks.
+    # we try and keep the size close to what was requested
+    chunkSize = max(int((chunkSize/64)/P),1)*P*64
+    
+    # build XtX incrementally and also the totals of every variable.
+    chunkBit = BitArray(P, chunkSize)
+    chunk = Array(Float32, P, chunkSize)
+    numChunks = int(ceil(N/chunkSize))
+    for i in 1:numChunks-1
+        read!(stream, chunkBit)
+        chunk[:,:] = chunkBit
+        XtX .+= A_mul_Bt(chunk,chunk) # using a float array is important to get LAPACK speed
+        varSums .+= sum(chunk,2)
+        if !quiet println("processed $(i*chunkSize*1000) bp...") end
     end
-    C .-= transpose(sumData)*sumData/N
-    C ./= (N-1);
+
+    # get the last unevenly sized chunk
+    chunkBit = BitArray(P, N - (numChunks-1)*chunkSize)
+    chunk = Array(Float32, P, N - (numChunks-1)*chunkSize)
+    read!(stream, chunkBit)
+    chunk[:,:] = chunkBit
+    XtX .+= A_mul_Bt(chunk,chunk)
+    varSums .+= sum(chunk,2)
+    
+    # convert XtX to a covariance matrix
+    XtX .-= transpose(varSums)*varSums/N
+    XtX ./= (N-1)
 end
 
 function load_chromnet_matrix(dirName)
 	f = open("$dirName/matrix")
-	N = read(f, Int64)
 	P = read(f, Int64)
-	data = falses(N, P)
+	N = read(f, Int64)
+	data = falses(P, N)
 	read!(f, data)
 	close(f)
 	data,vec(readdlm("$dirName/header"))
 end
 
 function save_chromnet_matrix(outDir, data::BitArray{2}, header::Array)
-	@assert size(data)[2] == length(header)
+	@assert size(data)[1] == length(header)
 
 	mkpath(outDir)
 
