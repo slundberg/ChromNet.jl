@@ -1,6 +1,6 @@
 module ChromNet
 
-export window_bed_file, load_chromnet_matrix, save_chromnet_matrix, streaming_cov
+export window_bed_file, load_chromnet_matrix, save_chromnet_matrix, streaming_cov, cov2cor!
 
 chrNames = [
     "chr1", "chr2", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8",
@@ -44,7 +44,7 @@ function window_bed_file(stream)
 	binValues
 end
 
-function streaming_cov(stream; chunkSize=100000, quiet=false)
+function streaming_cov(stream::IOStream; chunkSize=100000, quiet=false)
     P = read(stream, Int64)
     N = read(stream, Int64)
     XtX = zeros(Float64, P, P)
@@ -80,6 +80,37 @@ function streaming_cov(stream; chunkSize=100000, quiet=false)
     XtX ./= (N-1)
 end
 
+function streaming_cov(bigData::BitArray{2}; chunkSize=100000, quiet=false)
+    P,N = size(bigData)
+    XtX = zeros(Float64, P, P)
+    varSums = zeros(Float64, P, 1)
+
+    # force the chunk size to line up with 64 bit word boundaries,
+    # this is most important for loading from a file, but we also use it here.
+    # we try and keep the size close to what was requested
+    chunkSize = max(int(chunkSize/64),1)*64
+    
+    # build XtX incrementally and also the totals of every variable.
+    chunk = Array(Float32, P, chunkSize)
+    numChunks = int(ceil(N/chunkSize))
+    for i in 1:numChunks-1
+        chunk[:,:] = bigData[:,(i-1)*chunkSize+1:i*chunkSize]
+        XtX .+= A_mul_Bt(chunk,chunk) # using a float array is important to get LAPACK speed
+        varSums .+= sum(chunk,2)
+        if !quiet println("processed $(i*chunkSize*1000) bp...") end
+    end
+
+    # get the last unevenly sized chunk
+    chunk = Array(Float32, P, N - (numChunks-1)*chunkSize)
+    chunk[:,:] = bigData[:,(numChunks-1)*chunkSize+1:end]
+    XtX .+= A_mul_Bt(chunk,chunk)
+    varSums .+= sum(chunk,2)
+    
+    # convert XtX to a covariance matrix
+    XtX .-= varSums*varSums'/N
+    XtX ./= (N-1)
+end
+
 function load_chromnet_matrix(dirName)
 	f = open("$dirName/matrix")
 	P = read(f, Int64)
@@ -102,6 +133,17 @@ function save_chromnet_matrix(outDir, data::BitArray{2}, header::Array)
     close(f)
 
     writedlm("$outDir/header", header)
+end
+
+function cov2cor!(M)
+    for i in 1:size(M)[1]
+        val = sqrt(M[i,i])
+        if val > 0.0
+            M[i,:] ./= val
+            M[:,i] ./= val
+        end
+    end
+    M
 end
 
 end
