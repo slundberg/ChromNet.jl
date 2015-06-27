@@ -6,6 +6,7 @@ s = ArgParseSettings()
                "For each line trailing fields may be omitted and follow the tab separated format: "*
                "BED_FILE_NAME SHORT_TITLE LONG_TITLE CELL_TYPE LAB EXPERIMENT_ID ANTIBODY_ID TREATMENTS ORGANISM LIFE_STAGE LINK"
         arg_type = ASCIIString
+        required = true
     "--data","-d"
         help = "Location of the binary chromnet data matrix"
         default = dirname(Base.source_path())*"/ENCODE_build1.ChromNet"
