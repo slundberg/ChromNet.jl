@@ -28,7 +28,7 @@ Decompress the downloaded data package and from inside the directory run:
 julia build_network.jl CONFIG_FILE -o output_file.json
 ```
 
-The output JSON file can be dropped into the ChromNet interface at http://chromnet.cs.washington.edu, the config file lists custom BED files to be incorporated into the network. Each line of the config file should conform to the following TAB separated format, where trailing entries can be omitted:
+The output JSON file can be dropped into the ChromNet interface at http://chromnet.cs.washington.edu. The config file lists custom BED files to be incorporated into the network. Each line of the config file should conform to the following TAB separated format, where trailing entries can be omitted:
 
 ```
 BED_FILE_NAME SHORT_TITLE LONG_TITLE CELL_TYPE LAB EXPERIMENT_ID ANTIBODY_ID TREATMENTS ORGANISM LIFE_STAGE LINK
