@@ -1,6 +1,6 @@
 export build_groups, build_groupgm, parse_config, build_network
 
-using HClust # Pkg.clone("https://github.com/davidavdav/HClust.jl.git")
+using Clustering
 using GZip
 
 function build_groups(C, header)
