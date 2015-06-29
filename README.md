@@ -8,7 +8,7 @@ Integrates any BED file into the ChromNet group graphical model, the JSON networ
 
 ## Installation
 
-- Ensure that a recent version of [Julia](http://www.julialang.com) is installed. ChromNet is written in Julia for performance and portability reasons.
+- Ensure that a recent version of [Julia](http://www.julialang.com/downloads/) is installed. ChromNet is written in Julia for performance and portability reasons.
 - Download the [current data package](http://cloud.google.com/sdfsdf) which contains the ChromNet processed version of all ENCODE ChIP-seq data. Also contained in this package is a Julia script, which when run, will generate a new ChromNet model using the ENCODE data and any user-provided BED files.
 
 Currently the clustering method used is part of an unreleased version of the Clustering.jl package. This means that for the moment you must also checkout the most recent (unreleased) clustering package. This can be done from the command line using:
