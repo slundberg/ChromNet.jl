@@ -109,7 +109,7 @@ function build_network(G, header, groups, metadata; threshold=0.03, groupLinkThr
             push!(nodes, {
                 "name" => "$i",
                 "group" => 1,
-                "groupScore" => groups[i][1],
+                "groupScore" => 1-groups[i][1],
                 "parent" => find_parent(groups, id, i+1)-1,
                 "data" => [
                     "id" => "$i"
