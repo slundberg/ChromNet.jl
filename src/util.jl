@@ -62,7 +62,7 @@ function streaming_cov(stream::IOStream; chunkSize=100000, quiet=false)
         chunk[:,:] = chunkBit
         XtX .+= A_mul_Bt(chunk,chunk) # using a float array is important to get LAPACK speed
         varSums .+= sum(chunk,2)
-        if !quiet println("processed $(i*chunkSize*1000) bp...") end
+        if !quiet println(STDERR, "processed $(i*chunkSize*1000) bp...") end
     end
 
     # get the last unevenly sized chunk
@@ -95,7 +95,7 @@ function streaming_cov(bigData::BitArray{2}; chunkSize=100000, quiet=false)
         chunk[:,:] = bigData[:,(i-1)*chunkSize+1:i*chunkSize]
         XtX .+= A_mul_Bt(chunk,chunk) # using a float array is important to get LAPACK speed
         varSums .+= sum(chunk,2)
-        if !quiet println("processed $(i*chunkSize*1000) bp...") end
+        if !quiet println(STDERR, "processed $(i*chunkSize*1000) bp...") end
     end
 
     # get the last unevenly sized chunk
