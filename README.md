@@ -1,7 +1,7 @@
 
 # ChromNet.jl
 
-Integrates any bed file into the ChromNet group graphical model, the JSON network file produced can then be explored using http://chromnet.cs.washington.edu.
+Integrates any BED file into the ChromNet group graphical model, the JSON network file produced can then be explored using http://chromnet.cs.washington.edu.
 
 [![Build Status](https://travis-ci.org/slundberg/ChromNet.jl.svg?branch=master)](https://travis-ci.org/slundberg/ChromNet.jl)
 
@@ -39,3 +39,7 @@ The simplest configuration file is just a list of BED file names, and `build_net
 ```shell
 ls ~/my_bed_files/*.bed | julia build_network.jl - > output_file.json
 ```
+
+## BED format
+
+ChromNet only relies on the first three field of the BED format (chrom, chromStart, and chromEnd). This means other tab delimited formats that follow the same conventions are also compatabile with `build_network.jl`. This includes the narrowPeak format produced by MACS2 and other peak calling software.
