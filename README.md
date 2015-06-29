@@ -22,13 +22,13 @@ The Travis build currently fails because of this dependence on an unreleased pac
 
 ## Usage
 
-Decompress the downloaded data package and run
+Decompress the downloaded data package and from inside the directory run:
 
 ```bash
 julia build_network.jl CONFIG_FILE -o output_file.json
 ```
 
-from inside the directory. The output JSON file can be dropped into the ChromNet interface at http://chromnet.cs.washington.edu, the config file lists custom BED files to be incorporated into the network. Each line of the config file should conform to the following TAB separated format, where trailing entries can be omitted:
+The output JSON file can be dropped into the ChromNet interface at http://chromnet.cs.washington.edu, the config file lists custom BED files to be incorporated into the network. Each line of the config file should conform to the following TAB separated format, where trailing entries can be omitted:
 
 ```
 BED_FILE_NAME SHORT_TITLE LONG_TITLE CELL_TYPE LAB EXPERIMENT_ID ANTIBODY_ID TREATMENTS ORGANISM LIFE_STAGE LINK
