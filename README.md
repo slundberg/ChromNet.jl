@@ -42,4 +42,4 @@ ls ~/my_bed_files/*.bed | julia build_network.jl - > output_file.json
 
 ## BED format
 
-ChromNet only relies on the first three field of the BED format (chrom, chromStart, and chromEnd). This means other tab delimited formats that follow the same conventions are also compatabile with `build_network.jl`. This includes the narrowPeak format produced by MACS2 and other peak calling software.
+ChromNet only relies on the first three fields of the BED format (chrom, chromStart, and chromEnd). This means other tab delimited formats that follow the same conventions are also compatabile with `build_network.jl`. This includes the narrowPeak format produced by MACS2 and other peak calling software.
