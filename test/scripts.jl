@@ -8,7 +8,7 @@ isfile("data/small.ChromNet") && rm("data/small.ChromNet")
 save_chromnet_matrix("data/small.ChromNet", M, header)
 metadata = {
 	"A01" => {
-		"name" => "A",
+    	"name" => "A",
         "id" => "A01",
         "description" => "A desc",
         "cellType" => "A cellType",
@@ -19,7 +19,7 @@ metadata = {
         "antibody" => "Unknown"
 	},
 	"B01" => {
-		"name" => "B",
+    	"name" => "B",
         "id" => "B01",
         "description" => "B desc",
         "cellType" => "B cellType",
@@ -30,7 +30,7 @@ metadata = {
         "antibody" => "Unknown"
 	},
 	"C01" => {
-		"name" => "C",
+    	"name" => "C",
         "id" => "C01",
         "description" => "C desc",
         "cellType" => "C cellType",
@@ -41,7 +41,7 @@ metadata = {
         "antibody" => "Unknown"
 	},
 	"D01" => {
-		"name" => "D",
+    	"name" => "D",
         "id" => "D01",
         "description" => "D desc",
         "cellType" => "D cellType",

@@ -10,14 +10,21 @@ s = ArgParseSettings()
     "--data","-d"
         help = "Location of the binary chromnet data matrix"
         default = dirname(Base.source_path())*"/ENCODE_build1.ChromNet"
+    "--output","-o"
+        help = "Where to save the network JSON file (default is STDOUT)"
+        default = "-"
+    "--save-cov"
+        help = "Save a copy of the raw data covariance matrix"
+        metavar = "COV_FILE"
     "--threshold"
-        help = "at what absolute value threshold do we keep links"
+        help = "At what absolute value threshold do we keep links"
         arg_type = Float64
         default = 0.03
-    "--group_link_threshold"
-        help = "below what group score do we discard connecting links [0.0-1.0]"
+    "--group-link-threshold"
+        help = "Below what group score do we discard connecting links [0.0-1.0]"
         arg_type = Float64
         default = 0.7
+        metavar = "THRESHOLD"
     "--quiet", "-q"
         help = "Don't print anything"
         action = :store_true
@@ -25,11 +32,15 @@ end
 args = parse_args(s)
 inputConfig = args["input_config"]
 dataDir = args["data"]
+output = args["output"]
+saveCov = args["save-cov"]
 quiet = args["quiet"]
-
+println(saveCov)
+exit()
 using ChromNet
 using JSON
 using GZip
+
 
 # load the metadata
 inStream = STDIN
@@ -39,7 +50,8 @@ if inputConfig != "-"
     bedFileRoot = dirname(inputConfig)
 end
 
-metadata = merge(JSON.parse(open(readall, "$dataDir/metadata")), parse_config(inStream, bedFileRoot))
+metadata = dataDir == "none" ? {} : JSON.parse(open(readall, "$dataDir/metadata"))
+metadata = merge(metadata, parse_config(inStream, bedFileRoot))
 if inputConfig != "-" close(inStream) end
 
 # extract all the bed files and custom dataset ids
@@ -53,7 +65,10 @@ for (k,v) in metadata
 end
 
 # load the main data matrix
-mainData,mainHeader = load_chromnet_matrix(dataDir)
+mainHeader = ASCIIString[]
+if dataDir != "none"
+    mainData,mainHeader = load_chromnet_matrix(dataDir)
+end
 
 # create space for the joint data matrix
 jointData = falses(length(customHeader)+length(mainHeader), ChromNet.totalBins)
@@ -72,7 +87,14 @@ end
 
 # compute the joint correlation matrix
 quiet || println(STDERR, "Computing data covariance...")
-C = cov2cor!(streaming_cov(jointData, quiet=quiet))
+C = streaming_cov(jointData, quiet=quiet)
+if saveCov != nothing
+    f = open(saveCov, "w")
+    println(f, join(jointData, ','))
+    writecsv(f, C)
+    close(f)
+end
+cov2cor!(C)
 
 # compute groups using hclust
 groups = build_groups(C, jointHeader)
@@ -80,7 +102,12 @@ groups = build_groups(C, jointHeader)
 # compute groupgm matrix
 G,headerG = build_groupgm(inv(C), jointHeader, groups)
 
+# open the output stream
+outStream = STDOUT
+if output != "-"
+    outStream = open(output)
+end
+
 # output network json data
 network = build_network(G, headerG, groups, metadata, threshold=0.03, groupLinkThreshold=0.7)
-println(json(network))
-
+println(outStream, json(network))
