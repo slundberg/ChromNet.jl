@@ -35,8 +35,7 @@ dataDir = args["data"]
 output = args["output"]
 saveCov = args["save-cov"]
 quiet = args["quiet"]
-println(saveCov)
-exit()
+
 using ChromNet
 using JSON
 using GZip

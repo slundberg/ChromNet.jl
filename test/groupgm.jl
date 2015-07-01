@@ -4,7 +4,7 @@ using JSON
 C = cov([M' M'])
 groups = build_groups(C, [header, header])
 for i in 1:4:length(groups[end][2])
-	@test groups[end][2][i] == groups[end][2][i+2] # make sure duplicates are grouped together
+    @test groups[end][2][i] == groups[end][2][i+2] # make sure duplicates are grouped together
 end
 
 ## build_groupgm
@@ -26,8 +26,8 @@ header = ["A01", "B01", "C01", "D01"]
 isfile("data/small.ChromNet") && rm("data/small.ChromNet")
 save_chromnet_matrix("data/small.ChromNet", M, header)
 metadata = {
-	"A01" => {
-		"name" => "A",
+    "A01" => {
+        "name" => "A",
         "id" => "A01",
         "description" => "A desc",
         "cellType" => "A cellType",
@@ -36,9 +36,9 @@ metadata = {
         "lifeStage" => "None",
         "treatments" => "None",
         "antibody" => "Unknown"
-	},
-	"B01" => {
-		"name" => "B",
+    },
+    "B01" => {
+        "name" => "B",
         "id" => "B01",
         "description" => "B desc",
         "cellType" => "B cellType",
@@ -47,9 +47,9 @@ metadata = {
         "lifeStage" => "None",
         "treatments" => "None",
         "antibody" => "Unknown"
-	},
-	"C01" => {
-		"name" => "C",
+    },
+    "C01" => {
+        "name" => "C",
         "id" => "C01",
         "description" => "C desc",
         "cellType" => "C cellType",
@@ -58,9 +58,9 @@ metadata = {
         "lifeStage" => "None",
         "treatments" => "None",
         "antibody" => "Unknown"
-	},
-	"D01" => {
-		"name" => "D",
+    },
+    "D01" => {
+        "name" => "D",
         "id" => "D01",
         "description" => "D desc",
         "cellType" => "D cellType",
@@ -69,7 +69,7 @@ metadata = {
         "lifeStage" => "None",
         "treatments" => "None",
         "antibody" => "Unknown"
-	}
+    }
 }
 C = cov(M')
 groups = build_groups(C, header)
