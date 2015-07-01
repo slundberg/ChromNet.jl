@@ -84,6 +84,9 @@ for (i,file) in enumerate(bedFiles)
     else
         jointData[i,:] = open(window_bed_file, file)
     end
+    if !quiet && i % 10 == 0
+        println(STDERR, "$i files processed...")
+    end
 end
 
 # compute the joint correlation matrix
