@@ -49,7 +49,7 @@ if inputConfig != "-"
     bedFileRoot = dirname(inputConfig)
 end
 
-metadata = dataDir == "none" ? {} : JSON.parse(open(readall, "$dataDir/metadata"))
+metadata = dataDir == "none" ? Dict() : JSON.parse(open(readall, "$dataDir/metadata"))
 metadata = merge(metadata, parse_config(inStream, bedFileRoot))
 if inputConfig != "-" close(inStream) end
 
@@ -71,7 +71,9 @@ end
 
 # create space for the joint data matrix
 jointData = falses(length(customHeader)+length(mainHeader), ChromNet.totalBins)
-jointData[length(customHeader)+1:end,:] = mainData
+if dataDir != "none"
+    jointData[length(customHeader)+1:end,:] = mainData
+end
 jointHeader = [customHeader, mainHeader]
 
 # bin the bed files and add them to the joint matrix

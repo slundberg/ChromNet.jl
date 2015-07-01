@@ -7,8 +7,8 @@ header = ["A01", "B01", "C01", "D01"]
 isfile("data/small.ChromNet") && rm("data/small.ChromNet")
 save_chromnet_matrix("data/small.ChromNet", M, header)
 metadata = {
-	"A01" => {
-    	"name" => "A",
+    "A01" => {
+        "name" => "A",
         "id" => "A01",
         "description" => "A desc",
         "cellType" => "A cellType",
@@ -17,9 +17,9 @@ metadata = {
         "lifeStage" => "None",
         "treatments" => "None",
         "antibody" => "Unknown"
-	},
-	"B01" => {
-    	"name" => "B",
+    },
+    "B01" => {
+        "name" => "B",
         "id" => "B01",
         "description" => "B desc",
         "cellType" => "B cellType",
@@ -28,9 +28,9 @@ metadata = {
         "lifeStage" => "None",
         "treatments" => "None",
         "antibody" => "Unknown"
-	},
-	"C01" => {
-    	"name" => "C",
+    },
+    "C01" => {
+        "name" => "C",
         "id" => "C01",
         "description" => "C desc",
         "cellType" => "C cellType",
@@ -39,9 +39,9 @@ metadata = {
         "lifeStage" => "None",
         "treatments" => "None",
         "antibody" => "Unknown"
-	},
-	"D01" => {
-    	"name" => "D",
+    },
+    "D01" => {
+        "name" => "D",
         "id" => "D01",
         "description" => "D desc",
         "cellType" => "D cellType",
@@ -50,7 +50,8 @@ metadata = {
         "lifeStage" => "None",
         "treatments" => "None",
         "antibody" => "Unknown"
-	}
+    }
 }
 open(f->println(f, json(metadata)), "data/small.ChromNet/metadata", "w") 
+run(`julia ../scripts/build_network.jl data/single_bed.config --data none --quiet` |> "data/small.json")
 run(`julia ../scripts/build_network.jl data/single_bed.config --data data/small.ChromNet --quiet` |> "data/small.json")
