@@ -84,7 +84,7 @@ for (i,file) in enumerate(bedFiles)
     else
         jointData[i,:] = open(window_bed_file, file)
     end
-    if !quiet && i % 10 == 0
+    if !quiet && i % 100 == 0
         println(STDERR, "$i files processed...")
     end
 end
@@ -94,7 +94,7 @@ quiet || println(STDERR, "Computing data covariance...")
 C = streaming_cov(jointData, quiet=quiet)
 if saveCov != nothing
     f = open(saveCov, "w")
-    println(f, join(jointData, ','))
+    println(f, join(jointHeader, ','))
     writecsv(f, C)
     close(f)
 end
