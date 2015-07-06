@@ -92,6 +92,7 @@ end
 # compute the joint correlation matrix
 quiet || println(STDERR, "Computing data covariance...")
 C = streaming_cov(jointData, quiet=quiet)
+C .+= eye(size(C)...)*0.000001 # prevent singular matricies
 if saveCov != nothing
     f = open(saveCov, "w")
     println(f, join(jointHeader, ','))

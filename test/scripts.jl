@@ -53,5 +53,5 @@ metadata = {
     }
 }
 open(f->println(f, json(metadata)), "data/small.ChromNet/metadata", "w") 
-run(`julia ../scripts/build_network.jl data/single_bed.config --data none --quiet` |> "data/small.json")
+run(`julia ../scripts/build_network.jl data/four_bed.config --data none --quiet` |> "data/small.json")
 run(`julia ../scripts/build_network.jl data/single_bed.config --data data/small.ChromNet --quiet` |> "data/small.json")
