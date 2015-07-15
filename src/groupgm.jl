@@ -37,11 +37,10 @@ function build_groupgm(I, header, groups)
     end
 
     # fill in our group matrix
-    for i in 1:length(groups)
-        ind1 = map(x->indexMap[x], split(groups[i][2]))
-        for j in i:length(groups)
-            ind2 = map(x->indexMap[x], split(groups[j][2]))
-            G[j,i] = G[i,j] = sum(I[ind1,ind2])
+    indexGroups = collect(map(g->collect(map(x->indexMap[x], split(g[2]))), groups))
+    for i in 1:length(indexGroups)
+        for j in i:length(indexGroups)
+            G[j,i] = G[i,j] = sum(I[indexGroups[j],indexGroups[i]])
         end
     end
 
