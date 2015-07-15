@@ -12,7 +12,7 @@ C = cov([M[1,:]' M[1,:]' M[2,:]'.+0.01*M[1,:]' M[3,:]'] .+ 0.0001*randn(size(M)[
 groups = build_groups(C, header[1:4])
 I = inv(C)
 G,headerG = build_groupgm(I, header[1:4], groups)
-@test I[1,3] + I[2,3] == G[5,3]
+@test abs(I[1,3] + I[2,3] - G[5,3]) < 10e-8
 
 ## parse_config
 metadata = open(f->parse_config(f, "data"), "data/single_bed.config")

@@ -39,9 +39,9 @@ function build_groupgm(I, header, groups)
     # fill in our group matrix
     for i in 1:length(groups)
         ind1 = map(x->indexMap[x], split(groups[i][2]))
-        for j in 1:length(groups)
+        for j in i:length(groups)
             ind2 = map(x->indexMap[x], split(groups[j][2]))
-            G[i,j] = sum(I[ind1,ind2])
+            G[j,i] = G[i,j] = sum(I[ind1,ind2])
         end
     end
 
@@ -143,7 +143,7 @@ function build_network(G, header, groups, metadata; threshold=0.03, groupLinkThr
 
             # make sure we pass the threshold and are not between nested groups
             if (abs(G[i,j]) > threshold && searchindex(groups[i][2], groups[j][2]) == 0
-                && searchindex(groups[j][2], groups[i][2]) == 0 
+                && searchindex(groups[j][2], groups[i][2]) == 0
                 && groups[i][1] < groupLinkThreshold && groups[j][1] < groupLinkThreshold)
 
                 d = {
