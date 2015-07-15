@@ -1,4 +1,4 @@
-export window_bed_file, load_chromnet_matrix, save_chromnet_matrix, streaming_cov, cov2cor!
+export window_bed_file, load_chromnet_matrix, save_chromnet_matrix, streaming_cov, conditional_cov, cov2cor!
 
 chrNames = [
     "chr1", "chr2", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8",
@@ -21,7 +21,7 @@ end
 
 # see how long the genome is in bins
 totalBins = int(ceil(sum(chrLengths)/1000))
- 
+
 # creates a BitArray with a 1 for every bin overlapped by the bed file regions
 function window_bed_file(stream)
 	global chrOffsets, totalBins
@@ -52,7 +52,7 @@ function streaming_cov(stream::IOStream; chunkSize=100000, quiet=false)
     # this is important for loading the BitArray in blocks.
     # we try and keep the size close to what was requested
     chunkSize = max(int(chunkSize/64),1)*64
-    
+
     # build XtX incrementally and also the totals of every variable.
     chunkBit = BitArray(P, chunkSize)
     chunk = Array(Float32, P, chunkSize)
@@ -72,7 +72,7 @@ function streaming_cov(stream::IOStream; chunkSize=100000, quiet=false)
     chunk[:,:] = chunkBit
     XtX .+= A_mul_Bt(chunk,chunk)
     varSums .+= sum(chunk,2)
-    
+
     # convert XtX to a covariance matrix
     XtX .-= varSums*varSums'/N
     XtX ./= (N-1)
@@ -87,7 +87,7 @@ function streaming_cov(bigData::BitArray{2}; chunkSize=100000, quiet=false)
     # this is most important for loading from a file, but we also use it here.
     # we try and keep the size close to what was requested
     chunkSize = max(int(chunkSize/64),1)*64
-    
+
     # build XtX incrementally and also the totals of every variable.
     chunk = Array(Float32, P, chunkSize)
     numChunks = int(ceil(N/chunkSize))
@@ -103,7 +103,7 @@ function streaming_cov(bigData::BitArray{2}; chunkSize=100000, quiet=false)
     chunk[:,:] = bigData[:,(numChunks-1)*chunkSize+1:end]
     XtX .+= A_mul_Bt(chunk,chunk)
     varSums .+= sum(chunk,2)
-    
+
     # convert XtX to a covariance matrix
     XtX .-= varSums*varSums'/N
     XtX ./= (N-1)
@@ -131,6 +131,13 @@ function save_chromnet_matrix(outDir, data::BitArray{2}, header::Array)
     close(f)
 
     writedlm("$outDir/header", header)
+end
+
+function conditional_cov(C, numCondOn, reg)
+    controlC = C[1:numCondOn,1:numCondOn]
+    targetC = C[numCondOn+1:end,numCondOn+1:end]
+    crossC = C[numCondOn+1:end,1:numCondOn]
+    A = targetC .- crossC*inv(controlC .+ reg*eye(size(controlC)[1]))*transpose(crossC) .+ reg*eye(size(targetC)[1])
 end
 
 function cov2cor!(M)

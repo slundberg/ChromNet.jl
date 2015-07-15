@@ -22,6 +22,12 @@ C = open(f->streaming_cov(f, chunkSize=3, quiet=true), "data/tmp.ChromNet/matrix
 ## streaming_cov from an inmemory bit array
 @test all(abs(streaming_cov(M, chunkSize=3, quiet=true) .- cov(M')) .< 1e-10)
 
+## conditional_cov
+C = cov(M')
+smallC = conditional_cov(C, 10, 0.0)
+IC = inv(C)
+@test all(abs(smallC .- inv(IC[11:end,11:end])) .< 1e-10)
+
 ## cov2cor!
 C = cov(M')
 @test all(abs(cov2cor!(C) .- cor(M')) .< 1e-10)
