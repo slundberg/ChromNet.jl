@@ -9,7 +9,13 @@ Integrates any BED file into the ChromNet group graphical model, the JSON networ
 ## Installation
 
 - Ensure that a recent version of [Julia](http://www.julialang.com/downloads/) is installed. ChromNet is written in Julia for performance and portability reasons.
-- Download the [current data package](https://storage.googleapis.com/link-uw-human/ChromNet_build1.zip) which contains the ChromNet processed version of all ENCODE ChIP-seq data. Also contained in this package is a Julia script, which when run, will generate a new ChromNet model using the ENCODE data and any user-provided BED files.
+- Download the [current data package](https://storage.googleapis.com/link-uw-human/ChromNet_build1.zip) (currently at build 1) which contains the ChromNet processed version of all ENCODE ChIP-seq data. Also contained in this package is a Julia script, which when run, will generate a new ChromNet model using the ENCODE data and any user-provided BED files.
+
+#### Upgrading
+If you have already used ChromNet before, ensure you have the latest data package, and then run `Pkg.update()` in the Julia console to fetch any code updates. In a UNIX shell this can be done with one command:
+```shell
+julia -e 'Pkg.update()'
+```
 
 ## Usage
 
