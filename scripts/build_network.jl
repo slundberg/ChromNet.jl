@@ -74,7 +74,7 @@ jointData = falses(length(customHeader)+length(mainHeader), ChromNet.totalBins)
 if dataDir != "none"
     jointData[length(customHeader)+1:end,:] = mainData
 end
-jointHeader = [customHeader, mainHeader]
+jointHeader = [customHeader; mainHeader]
 
 # bin the bed files and add them to the joint matrix
 quiet || println(STDERR, "Windowing BED files...")
@@ -93,7 +93,7 @@ end
 quiet || println(STDERR, "Computing data covariance...")
 C = streaming_cov(jointData, quiet=quiet)
 C .+= eye(size(C)...)*0.000001 # prevent singular matricies
-if saveCov != nothing
+if typeof(saveCov) != Void
     f = open(saveCov, "w")
     println(f, join(jointHeader, ','))
     writecsv(f, C)

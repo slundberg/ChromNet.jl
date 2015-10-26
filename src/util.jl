@@ -20,7 +20,7 @@ for i in 1:length(chrLengths)
 end
 
 # see how long the genome is in bins
-totalBins = int(ceil(sum(chrLengths)/1000))
+totalBins = round(Int64, ceil(sum(chrLengths)/1000))
 
 # creates a BitArray with a 1 for every bin overlapped by the bed file regions
 function window_bed_file(stream)
@@ -31,8 +31,8 @@ function window_bed_file(stream)
 	for line in eachline(stream)
 	    parts = split(line, '\t')
 	    if haskey(chrOffsets, parts[1])
-	        startPos = ceil((chrOffsets[parts[1]]+int(parts[2]))/1000)
-	        endPos = ceil((chrOffsets[parts[1]]+int(parts[3]))/1000)
+	        startPos = ceil(Int64, (chrOffsets[parts[1]]+parse(Int64, parts[2]))/1000)
+	        endPos = ceil(Int64, (chrOffsets[parts[1]]+parse(Int64, parts[3]))/1000)
 	        for i in startPos:endPos
 	            binValues[i] = 1
 	        end
@@ -51,12 +51,12 @@ function streaming_cov(stream::IOStream; chunkSize=100000, quiet=false)
     # force the chunk size to line up with 64 bit word boundaries,
     # this is important for loading the BitArray in blocks.
     # we try and keep the size close to what was requested
-    chunkSize = max(int(chunkSize/64),1)*64
+    chunkSize = max(round(Int64, chunkSize/64),1)*64
 
     # build XtX incrementally and also the totals of every variable.
     chunkBit = BitArray(P, chunkSize)
     chunk = Array(Float32, P, chunkSize)
-    numChunks = int(ceil(N/chunkSize))
+    numChunks = round(Int64, ceil(N/chunkSize))
     for i in 1:numChunks-1
         read!(stream, chunkBit)
         chunk[:,:] = chunkBit
@@ -86,11 +86,11 @@ function streaming_cov(bigData::BitArray{2}; chunkSize=100000, quiet=false)
     # force the chunk size to line up with 64 bit word boundaries,
     # this is most important for loading from a file, but we also use it here.
     # we try and keep the size close to what was requested
-    chunkSize = max(int(chunkSize/64),1)*64
+    chunkSize = max(round(Int64, chunkSize/64),1)*64
 
     # build XtX incrementally and also the totals of every variable.
     chunk = Array(Float32, P, chunkSize)
-    numChunks = int(ceil(N/chunkSize))
+    numChunks = round(Int64, ceil(N/chunkSize))
     for i in 1:numChunks-1
         chunk[:,:] = bigData[:,(i-1)*chunkSize+1:i*chunkSize]
         XtX .+= A_mul_Bt(chunk,chunk) # using a float array is important to get LAPACK speed

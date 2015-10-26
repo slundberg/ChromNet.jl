@@ -2,7 +2,7 @@ using JSON
 
 ## build_groups
 C = cov([M' M'])
-groups = build_groups(C, [header, header])
+groups = build_groups(C, [header; header])
 for i in 1:4:length(groups[end][2])
     @test groups[end][2][i] == groups[end][2][i+2] # make sure duplicates are grouped together
 end
@@ -25,8 +25,8 @@ M[:,:] = rand(4, 1050) .> 0.5
 header = ["A01", "B01", "C01", "D01"]
 isfile("data/small.ChromNet") && rm("data/small.ChromNet")
 save_chromnet_matrix("data/small.ChromNet", M, header)
-metadata = {
-    "A01" => {
+metadata = Dict(
+    "A01" => Dict(
         "name" => "A",
         "id" => "A01",
         "description" => "A desc",
@@ -36,8 +36,8 @@ metadata = {
         "lifeStage" => "None",
         "treatments" => "None",
         "antibody" => "Unknown"
-    },
-    "B01" => {
+    ),
+    "B01" => Dict(
         "name" => "B",
         "id" => "B01",
         "description" => "B desc",
@@ -47,8 +47,8 @@ metadata = {
         "lifeStage" => "None",
         "treatments" => "None",
         "antibody" => "Unknown"
-    },
-    "C01" => {
+    ),
+    "C01" => Dict(
         "name" => "C",
         "id" => "C01",
         "description" => "C desc",
@@ -58,8 +58,8 @@ metadata = {
         "lifeStage" => "None",
         "treatments" => "None",
         "antibody" => "Unknown"
-    },
-    "D01" => {
+    ),
+    "D01" => Dict(
         "name" => "D",
         "id" => "D01",
         "description" => "D desc",
@@ -69,8 +69,8 @@ metadata = {
         "lifeStage" => "None",
         "treatments" => "None",
         "antibody" => "Unknown"
-    }
-}
+    )
+)
 C = cov(M')
 groups = build_groups(C, header)
 I = inv(C)

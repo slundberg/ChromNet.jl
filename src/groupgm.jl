@@ -16,7 +16,7 @@ function build_groups(C, header)
     end
 
     # build the results
-    groups = (Float64, ASCIIString)[]
+    groups = Tuple{Float64, ASCIIString}[]
     for (i,v) in enumerate(header)
         push!(groups, (0.0, v))
     end
@@ -88,12 +88,12 @@ function build_network(G, header, groups, metadata; threshold=0.03, groupLinkThr
     for (i,id) in enumerate(map(x->x[2], groups))
         if search(id, ' ') == 0
             md = metadata[id]
-            push!(nodes, {
+            push!(nodes, Dict{Any,Any}(
                 "name" => get(md, "name", id),
                 "group" => 0,
                 "groupScore" => 1.0,
                 "parent" => find_parent(groups, id, i+1)-1,
-                "data" => [
+                "data" => Dict{Any,Any}(
                     "id" => id,
                     "description" => get(md, "cellType", get(md, "name", id)),
                     "cellType" => get(md, "cellType", "Unknown"),
@@ -102,18 +102,18 @@ function build_network(G, header, groups, metadata; threshold=0.03, groupLinkThr
                     "lifeStage" => get(md, "lifeStage", "Unknown"),
                     "treatments" => get(md, "treatments", "None"),
                     "antibody" => get(md, "antibody", "Unknown")
-                ]
-            })
+                )
+            ))
         else
-            push!(nodes, {
+            push!(nodes, Dict{Any,Any}(
                 "name" => "$i",
                 "group" => 1,
                 "groupScore" => 1-groups[i][1],
                 "parent" => find_parent(groups, id, i+1)-1,
-                "data" => [
+                "data" => Dict{Any,Any}(
                     "id" => "$i"
-                ]
-            })
+                )
+            ))
         end
     end
 
@@ -145,12 +145,12 @@ function build_network(G, header, groups, metadata; threshold=0.03, groupLinkThr
                 && searchindex(groups[j][2], groups[i][2]) == 0
                 && groups[i][1] < groupLinkThreshold && groups[j][1] < groupLinkThreshold)
 
-                d = {
+                d = Dict{Any,Any}(
                     "source" => i-1,
                     "target" => j-1,
                     "coeff" => -G[i,j],
                     "labels" => get(metadata, "$idi,$idj", ASCIIString[])
-                }
+                )
 
                 # find all the labels that are represented by the edges between these groups
                 labels = ASCIIString[]
@@ -171,5 +171,5 @@ function build_network(G, header, groups, metadata; threshold=0.03, groupLinkThr
         end
     end
 
-    {"nodes" => nodes, "links" => links}
+    Dict("nodes" => nodes, "links" => links)
 end
