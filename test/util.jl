@@ -24,7 +24,7 @@ C = open(f->streaming_cov(f, chunkSize=3, quiet=true), "data/tmp.ChromNet/matrix
 
 ## conditional_cov
 C = cov(M')
-smallC = conditional_cov(C, 10, 0.0)
+smallC = conditional_cov(C, 1:10, 11:P, 0.0)
 IC = inv(C)
 @test all(abs(smallC .- inv(IC[11:end,11:end])) .< 1e-10)
 

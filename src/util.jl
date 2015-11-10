@@ -133,10 +133,10 @@ function save_chromnet_matrix(outDir, data::BitArray{2}, header::Array)
     writedlm("$outDir/header", header)
 end
 
-function conditional_cov(C, numCondOn, reg)
-    controlC = C[1:numCondOn,1:numCondOn]
-    targetC = C[numCondOn+1:end,numCondOn+1:end]
-    crossC = C[numCondOn+1:end,1:numCondOn]
+function conditional_cov(C, controlInds, usedInds, reg=1e-8)
+    controlC = C[controlInds,controlInds]
+    targetC = C[usedInds,usedInds]
+    crossC = C[usedInds,controlInds]
     A = targetC .- crossC*inv(controlC .+ reg*eye(size(controlC)[1]))*transpose(crossC) .+ reg*eye(size(targetC)[1])
 end
 

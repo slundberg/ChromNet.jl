@@ -4,7 +4,14 @@ using Clustering
 using GZip
 
 function build_groups(C, header)
-    h = hclust(1 .- abs(C), :complete)
+
+    # force C to be perfectly symmetric (rounding errors make hclust unhappy)
+    symC = deepcopy(C)
+    for i in 1:size(C)[1], j in 1:size(C)[2]
+        symC[j,i] = symC[i,j]
+    end
+
+    h = hclust(1 .- abs(symC), :complete)
 
     # build a list of all internal nodes in the hclust tree
     internalNodes = ASCIIString[]
