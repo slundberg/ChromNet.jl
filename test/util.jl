@@ -19,7 +19,7 @@ M2,header2 = load_chromnet_matrix("data/tmp.ChromNet")
 C = open(f->streaming_cov(f, chunkSize=3, quiet=true), "data/tmp.ChromNet/matrix")
 @test all(abs(C .- cov(M')) .< 1e-10)
 
-## streaming_cov from an inmemory bit array
+## streaming_cov from an in memory bit array
 @test all(abs(streaming_cov(M, chunkSize=3, quiet=true) .- cov(M')) .< 1e-10)
 
 ## conditional_cov
