@@ -34,7 +34,7 @@ function build_groups(C, header)
     groups
 end
 
-function build_groupgm(I, header, groups)
+function build_groupgm(I, header, groups; combiner=sum)
 
     # create a dense array and a map to its indexes
     G = zeros(length(groups), length(groups))
@@ -47,7 +47,7 @@ function build_groupgm(I, header, groups)
     indexGroups = collect(map(g->collect(map(x->indexMap[x], split(g[2]))), groups))
     for i in 1:length(indexGroups)
         for j in i:length(indexGroups)
-            G[j,i] = G[i,j] = sum(I[indexGroups[j],indexGroups[i]])
+            G[j,i] = G[i,j] = combiner(I[indexGroups[j],indexGroups[i]])
         end
     end
 
