@@ -49,7 +49,7 @@ function streaming_cor(dataFile; chunkSize=100000, quiet=false)
             chunk = Array(Float64, P, N-i+1)
         end
         streaming_cor_chunk!(XtX, data, (i, min(i+chunkSize-1,N)), chunk, means)
-        quiet || update!(p, min(i+chunkSize-1,N))
+        if !quiet update!(p, min(i+chunkSize-1,N)) end
     end
 
     cov2cor!(XtX)
