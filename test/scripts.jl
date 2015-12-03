@@ -1,6 +1,6 @@
 
 ## build_network.jl
-run(pipeline(`julia ../scripts/build_network.jl data/small.ChromNet.jld --quiet`, "data/small.json"))
+run(pipeline(`julia ../scripts/build_network.jl data/small.ChromNet.jld`, "data/small.json"))
 
 
 # ## build_network.jl

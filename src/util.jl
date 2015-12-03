@@ -43,7 +43,7 @@ function streaming_cor(dataFile; chunkSize=100000, quiet=false)
     chunkInt32 = Array(Int32, P, chunkSize)
     chunk = Array(Float64, P, chunkSize)
     numChunks = round(Int64, ceil(N/chunkSize))
-    p = Progress(N, 0.1, "Computing correlation: ", 34)
+    p = Progress(N, 0.1, "Computing correlation: ", 34, :green, STDERR)
     for i in 1:chunkSize:N
         if i+chunkSize-1 > N # account for the last unevenly sized chunk
             chunk = Array(Float64, P, N-i+1)
