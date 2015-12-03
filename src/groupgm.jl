@@ -87,7 +87,7 @@ function parse_config(stream, fileRoot)
 end
 
 
-function build_network(G, groups, metadata; threshold=0.03, groupScoreThreshold=0.7)
+function build_network(G, groups, metadata; threshold=0.03, groupScoreThreshold=0.7, quiet=false)
 
     function find_parent(groups, id, ind)
         for i in ind:length(groups)
@@ -186,5 +186,8 @@ function build_network(G, groups, metadata; threshold=0.03, groupScoreThreshold=
         end
     end
 
+    if !quiet
+        println(STDERR, "Created network with $(length(links)) links and $(length(nodes)) nodes.")
+    end
     Dict("nodes" => nodes, "links" => links)
 end

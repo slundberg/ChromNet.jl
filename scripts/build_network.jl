@@ -51,7 +51,7 @@ groups = build_groups(C, ids)
 # compute groupgm matrix and create network
 # we add a small amount of regularization to avoid potential singularity issues in user-provided data
 G,idsG = build_groupgm(inv(C + 1e-8I), ids, groups)
-network = build_network(G, groups, metadata, threshold=args["threshold"], groupScoreThreshold=args["group-score-threshold"])
+network = build_network(G, groups, metadata, threshold=args["threshold"], groupScoreThreshold=args["group-score-threshold"], quiet=args["quiet"])
 
 # send the network in JSON format to the output stream
 outStream = STDOUT
