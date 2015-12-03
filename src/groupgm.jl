@@ -61,9 +61,17 @@ function parse_config(stream, fileRoot)
     for line in eachline(stream)
         parts = split(strip(line), '\t')
         l = length(parts)
+
         obj = Dict()
-        obj["bedFile"] = joinpath(fileRoot, parts[1])
-        obj["name"] = l >= 2 ? parts[2] : basename(obj["bedFile"])
+        if ismatch(r".*\.bam$", parts[1])
+            obj["fileType"] = "bam"
+        elseif ismatch(r".*\.bed(\.gz)?$", parts[1])
+            obj["fileType"] = "bed"
+        else
+            obj["fileType"] = "unknown"
+        end
+        obj["dataFile"] = joinpath(fileRoot, parts[1])
+        obj["name"] = l >= 2 ? parts[2] : basename(obj["dataFile"])
         obj["description"] = l >= 3 ? parts[3] : obj["name"]
         obj["cellType"] = l >= 4 ? parts[4] : "Unlabeled custom upload"
         obj["lab"] = l >= 5 ? parts[5] : "Unlabeled custom upload"
@@ -79,7 +87,7 @@ function parse_config(stream, fileRoot)
 end
 
 
-function build_network(G, header, groups, metadata; threshold=0.03, groupLinkThreshold=0.7)
+function build_network(G, groups, metadata; threshold=0.03, groupScoreThreshold=0.7)
 
     function find_parent(groups, id, ind)
         for i in ind:length(groups)
@@ -102,7 +110,7 @@ function build_network(G, header, groups, metadata; threshold=0.03, groupLinkThr
                 "parent" => find_parent(groups, id, i+1)-1,
                 "data" => Dict{Any,Any}(
                     "id" => id,
-                    "description" => get(md, "cellType", get(md, "name", id)),
+                    "description" => get(md, "description", get(md, "name", id)),
                     "cellType" => get(md, "cellType", "Unknown"),
                     "lab" => get(md, "lab", "Unknown"),
                     "organism" => get(md, "organism", "Unknown"),
@@ -150,7 +158,7 @@ function build_network(G, header, groups, metadata; threshold=0.03, groupLinkThr
             # make sure we pass the threshold and are not between nested groups
             if (abs(G[i,j]) > threshold && searchindex(groups[i][2], groups[j][2]) == 0
                 && searchindex(groups[j][2], groups[i][2]) == 0
-                && groups[i][1] < groupLinkThreshold && groups[j][1] < groupLinkThreshold)
+                && groups[i][1] < groupScoreThreshold && groups[j][1] < groupScoreThreshold)
 
                 d = Dict{Any,Any}(
                     "source" => i-1,

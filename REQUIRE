@@ -3,3 +3,5 @@ GZip
 JSON
 ArgParse
 Clustering 0.4
+JLD
+ProgressMeter

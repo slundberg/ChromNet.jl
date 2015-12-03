@@ -1,26 +1,21 @@
 using ArgParse
 s = ArgParseSettings()
 @add_arg_table s begin
-    "input_config"
-        help = "File listing which bed files to integrate into the network. "*
-               "For each line trailing fields may be omitted and follow the tab separated format: "*
-               "BED_FILE_NAME SHORT_TITLE LONG_TITLE CELL_TYPE LAB EXPERIMENT_ID ANTIBODY_ID TREATMENTS ORGANISM LIFE_STAGE LINK"
+    "data_bundle"
+        help = "Location of the ChromNet data bundle (i.e. ENCODE_buildX.ChromNet.jld)"
         arg_type = ASCIIString
         required = true
-    "--data","-d"
-        help = "Location of the binary chromnet data matrix"
-        default = dirname(Base.source_path())*"/ENCODE_build1.ChromNet"
-    "--output","-o"
+    "output_location"
         help = "Where to save the network JSON file (default is STDOUT)"
         default = "-"
-    "--save-cov"
-        help = "Save a copy of the raw data covariance matrix"
-        metavar = "COV_FILE"
+    "--save-cor"
+        help = "Save a copy of the raw data correlation matrix"
+        metavar = "COR_FILE"
     "--threshold"
         help = "At what absolute value threshold do we keep links"
         arg_type = Float64
         default = 0.03
-    "--group-link-threshold"
+    "--group-score-threshold"
         help = "Below what group score do we discard connecting links [0.0-1.0]"
         arg_type = Float64
         default = 0.7
@@ -30,89 +25,37 @@ s = ArgParseSettings()
         action = :store_true
 end
 args = parse_args(s)
-inputConfig = args["input_config"]
-dataDir = args["data"]
-output = args["output"]
-saveCov = args["save-cov"]
-quiet = args["quiet"]
 
 using ChromNet
 using JSON
-using GZip
+using JLD
 
-
-# load the metadata
-inStream = STDIN
-bedFileRoot = "."
-if inputConfig != "-"
-    inStream = open(inputConfig)
-    bedFileRoot = dirname(inputConfig)
-end
-
-metadata = dataDir == "none" ? Dict() : JSON.parse(open(readall, "$dataDir/metadata"))
-metadata = merge(metadata, parse_config(inStream, bedFileRoot))
-if inputConfig != "-" close(inStream) end
-
-# extract all the bed files and custom dataset ids
-bedFiles = ASCIIString[]
-customHeader = ASCIIString[]
-for (k,v) in metadata
-    if haskey(v, "bedFile")
-        push!(bedFiles, v["bedFile"])
-        push!(customHeader, k)
-    end
-end
-
-# load the main data matrix
-mainHeader = ASCIIString[]
-if dataDir != "none"
-    mainData,mainHeader = load_chromnet_matrix(dataDir)
-end
-
-# create space for the joint data matrix
-jointData = falses(length(customHeader)+length(mainHeader), ChromNet.totalBins)
-if dataDir != "none"
-    jointData[length(customHeader)+1:end,:] = mainData
-end
-jointHeader = [customHeader; mainHeader]
-
-# bin the bed files and add them to the joint matrix
-quiet || println(STDERR, "Windowing BED files...")
-for (i,file) in enumerate(bedFiles)
-    if ismatch(r"\.gz$", file)
-        jointData[i,:] = GZip.open(window_bed_file, file)
-    else
-        jointData[i,:] = open(window_bed_file, file)
-    end
-    if !quiet && i % 100 == 0
-        println(STDERR, "$i files processed...")
-    end
-end
+# open the data bundle and load the metadata
+dataBundle = jldopen(args["data_bundle"])
+metadata = read(dataBundle, "metadata")
+ids = read(dataBundle, "ids")
 
 # compute the joint correlation matrix
-quiet || println(STDERR, "Computing data covariance...")
-C = streaming_cov(jointData, quiet=quiet)
-C .+= eye(size(C)...)*0.000001 # prevent singular matricies
-if typeof(saveCov) != Void
-    f = open(saveCov, "w")
-    println(f, join(jointHeader, ','))
-    writecsv(f, C)
+C = streaming_cor(args["data_bundle"], quiet=args["quiet"])
+if typeof(args["save-cor"]) != Void
+    f = open(args["save-cor"], "w")
+    println(f, join(ids, '\t'))
+    writedlm(f, C)
     close(f)
 end
 cov2cor!(C)
 
 # compute groups using hclust
-groups = build_groups(C, jointHeader)
+groups = build_groups(C, ids)
 
-# compute groupgm matrix
-G,headerG = build_groupgm(inv(C), jointHeader, groups)
+# compute groupgm matrix and create network
+# we add a small amount of regularization to avoid potential singularity issues in user-provided data
+G,idsG = build_groupgm(inv(C + 1e-8I), ids, groups)
+network = build_network(G, groups, metadata, threshold=args["threshold"], groupScoreThreshold=args["group-score-threshold"])
 
-# open the output stream
+# send the network in JSON format to the output stream
 outStream = STDOUT
-if output != "-"
-    outStream = open(output)
+if args["output_location"] != "-"
+    outStream = open(args["output_location"])
 end
-
-# output network json data
-network = build_network(G, headerG, groups, metadata, threshold=0.03, groupLinkThreshold=0.7)
 println(outStream, json(network))
