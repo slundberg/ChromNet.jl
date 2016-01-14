@@ -1,6 +1,8 @@
 
 # ChromNet.jl
 
+NOTE: These instructions are for v0.1, the current master has significant changes that will be described here soon.
+
 Integrates any BED file into the ChromNet group graphical model, the JSON network file produced can then be explored using http://chromnet.cs.washington.edu.
 
 [![Build Status](https://travis-ci.org/slundberg/ChromNet.jl.svg?branch=master)](https://travis-ci.org/slundberg/ChromNet.jl)
