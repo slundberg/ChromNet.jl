@@ -28,19 +28,27 @@ function window_bed_file(stream, contigs; binSize=1000)
 end
 
 "Designed to compute the correlation matrix from a ChromNet data bundle."
-function streaming_cor(dataFile; chunkSize=100000, quiet=false)
+function streaming_cor(dataFile, memData=nothing; chunkSize=10000, quiet=false)
 
-    # open data data file
+    # open data file
     f = jldopen(dataFile)
-    P = read(f, "P")
+    bundleP = read(f, "P")
     N = read(f, "N")
     means = read(f, "means")
     data = readmmap(f["data"])
     close(f)
 
-    # get all the regular sized chunks
+    means = [read(f, "means"); mean(memData, 2)]
+
+    if memData == nothing
+        memData = zeros(0,N)
+    else
+        @assert size(memData)[2] == N "Passed in-memory data size does not match bundle ($(size(memData)[2]) != $N)"
+    end
+    P = size(memData)[1] + bundleP
+
+    # loop through all the chunks
     XtX = zeros(Float64, P, P)
-    chunkInt32 = Array(Int32, P, chunkSize)
     chunk = Array(Float64, P, chunkSize)
     numChunks = round(Int64, ceil(N/chunkSize))
     p = Progress(N, 0.1, "Computing correlation: ", 34, :green, STDERR)
@@ -48,16 +56,21 @@ function streaming_cor(dataFile; chunkSize=100000, quiet=false)
         if i+chunkSize-1 > N # account for the last unevenly sized chunk
             chunk = Array(Float64, P, N-i+1)
         end
-        streaming_cor_chunk!(XtX, data, (i, min(i+chunkSize-1,N)), chunk, means)
+        streaming_cor_chunk!(XtX, data, memData, (i, min(i+chunkSize-1,N)), chunk, means)
         if !quiet update!(p, min(i+chunkSize-1,N)) end
     end
 
     cov2cor!(XtX)
     XtX + XtX' - eye(P)
 end
-function streaming_cor_chunk!(XtX, data, range, chunk, means)
-    P,w = size(chunk)
-    copy!(chunk, 1, data, P*(range[1]-1)+1, P*w) # converting to a float array is also important to get BLAS speed
+function streaming_cor_chunk!(XtX, data, memData, range, chunk, means)
+    memP = size(memData)[1]
+    bundleP = size(chunk)[1] - memP
+    w = size(chunk)[2]
+
+    chunk[1:bundleP,:] = data[:,range[1]:range[1]+w-1]
+    chunk[bundleP+1:end,:] = memData[:,range[1]:range[1]+w-1]
+    #copy!(chunk, 1, data, P*(range[1]-1)+1, P*w) # converting to a float array is also important to get BLAS speed
     for j in 1:size(chunk)[2]
         @simd for i in 1:size(chunk)[1]
             @inbounds chunk[i,j] -= means[i]

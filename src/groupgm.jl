@@ -87,7 +87,7 @@ function parse_config(stream, fileRoot)
 end
 
 
-function build_network(G, groups, metadata; threshold=0.03, groupScoreThreshold=0.7, quiet=false)
+function build_network(G, groups, metadata; threshold=0.2, groupScoreThreshold=0.7, quiet=false)
 
     function find_parent(groups, id, ind)
         for i in ind:length(groups)
@@ -158,8 +158,8 @@ function build_network(G, groups, metadata; threshold=0.03, groupScoreThreshold=
             # make sure we pass the threshold and are not between nested groups
             if (abs(G[i,j]) > threshold && searchindex(groups[i][2], groups[j][2]) == 0
                 && searchindex(groups[j][2], groups[i][2]) == 0
-                && groups[i][1] < groupScoreThreshold && groups[j][1] < groupScoreThreshold)
-
+                && groups[i][1] < 1-groupScoreThreshold && groups[j][1] < 1-groupScoreThreshold)
+                
                 d = Dict{Any,Any}(
                     "source" => i-1,
                     "target" => j-1,
