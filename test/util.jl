@@ -4,8 +4,9 @@ using GZip
 #binValues = GZip.open(window_bed_file, "data/K562_tss.bed.gz")
 
 ## streaming_cor from a file
-data = jldopen(f->read(f, "data"), "data/small.ChromNet.jld")
-C = streaming_cor("data/small.ChromNet.jld", chunkSize=3, quiet=true)
+f = jldopen("data/small.ChromNet.jld")
+data = read(f, "data")
+C = streaming_cor([f], chunkSize=3, quiet=true)
 @test all(abs(C .- cor(data, vardim=2)) .< 1e-10)
 
 ## streaming_cov from an in memory bit array
