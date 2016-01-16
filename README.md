@@ -1,17 +1,15 @@
 
 # ChromNet.jl
 
-NOTE: These instructions are for v0.1, the current master has significant changes that will be described here soon.
-
-Integrates any BED file into the ChromNet group graphical model, the JSON network file produced can then be explored using http://chromnet.cs.washington.edu.
+Integrates any BAM, BED, or narrowPeak file into the ChromNet group graphical model, the JSON network file produced can then be explored using http://chromnet.cs.washington.edu. The genomic context driving any group edge in the network can also be calculated. Details are available in our paper pre-print http://dx.doi.org/10.1101/023911.
 
 [![Build Status](https://travis-ci.org/slundberg/ChromNet.jl.svg?branch=master)](https://travis-ci.org/slundberg/ChromNet.jl)
 
 
 ## Installation
 
-- Ensure that a recent version of [Julia](http://www.julialang.com/downloads/) is installed. ChromNet is written in Julia for performance and portability reasons.
-- Download the [current data package](https://storage.googleapis.com/link-uw-human/ChromNet_build1.zip) (currently at build 1) which contains the ChromNet processed version of all ENCODE ChIP-seq data. Also contained in this package is a Julia script, which when run, will generate a new ChromNet model using the ENCODE data and any user-provided BED files.
+- Ensure that a recent version of [Julia](http://www.julialang.com/downloads/) is installed (v0.4 or later). ChromNet is written in Julia for performance and portability reasons.
+- Download the [current data package](https://drive.google.com/uc?export=download&id=0B8QcnMD1YRTXRnJFVy1BSkw0bW8) (currently at build 3) which contains the ChromNet processed version of all ENCODE ChIP-seq data. Also contained in this package is a Julia script, which when run, will generate a new ChromNet model using the ENCODE data and any user-provided BAM/BED files.
 
 #### Upgrading
 If you have already used ChromNet before, ensure you have the latest data package, and then run `Pkg.update()` in the Julia console to fetch any code updates. In a UNIX shell this can be done with one command:
@@ -21,24 +19,46 @@ julia -e 'Pkg.update()'
 
 ## Usage
 
-Decompress the downloaded data package and from inside the directory run:
+Below are examples of basic usage for each command. Running each command with the `--help` option will give more detailed documentation.
+
+### Build a custom data bundle
+
+To build a network from custom data, a custom data bundle must be generated. To do this, decompress the downloaded data package and from inside the directory run:
 
 ```bash
-julia build_network.jl CONFIG_FILE -o output_file.json
+julia build_bundle.jl CONFIG_FILE -o custom_bundle_name.ChromNet.jld
 ```
 
-The output JSON file can be dropped into the ChromNet interface at http://chromnet.cs.washington.edu. The config file lists custom BED files to be incorporated into the network. Each line of the config file should conform to the following TAB separated format, where trailing entries can be omitted:
+The config file lists custom BAM/BED files to be incorporated into the network. **Note all BAM and BED files must be aligned to hg38.** Each line of the config file should conform to the following TAB separated format, where trailing entries can be omitted:
 
 ```
-BED_FILE_NAME SHORT_TITLE LONG_TITLE CELL_TYPE LAB EXPERIMENT_ID ANTIBODY_ID TREATMENTS ORGANISM LIFE_STAGE LINK
+FILE_NAME SHORT_TITLE LONG_TITLE CELL_TYPE LAB EXPERIMENT_ID ANTIBODY_ID TREATMENTS ORGANISM LIFE_STAGE LINK
 ```
 
-The simplest configuration file is just a list of BED file names, and `build_network.jl` supports STDIN and STDOUT streaming. This means a one line invocation of ChromNet on UNIX systems is simply (where '-' denotes STDIN):
+The simplest configuration file is just a list of file names, and `build_bundle.jl` supports STDIN and STDOUT streaming. This means a one line invocation on UNIX systems is simply (where '-' denotes STDIN):
 
 ```shell
-ls ~/my_bed_files/*.bed | julia build_network.jl - > output_file.json
+ls ~/my_bed_files/*.bam | julia build_bundle.jl - > custom_bundle_name
+```
+
+### Build a custom network
+
+Given a set of data bundles a single ChromNet network that incorperates data from all bundles can be generated using the following command:
+
+```bash
+julia build_network.jl custom_bundle_name.ChromNet.jld ChromNet_human_build3.ChromNet.jld > network.json
+```
+
+The output JSON file can then be dropped into the ChromNet interface at http://chromnet.cs.washington.edu.
+
+### Calculate edge context
+
+To calculate the genomic context driving a specific group edge you can use the following command:
+
+```bash
+julia compute_edge_context.jl ENCSR000DMA|ENCSR000EGM ENCSR000BGX custom_bundle_name.ChromNet.jld ChromNet_human_build3.ChromNet.jld > out.bed
 ```
 
 ## BED format
 
-ChromNet only relies on the first three fields of the BED format (chrom, chromStart, and chromEnd). This means other tab delimited formats that follow the same conventions are also compatabile with `build_network.jl`. This includes the narrowPeak format produced by MACS2 and other peak calling software.
+ChromNet only relies on the first three fields of the BED format (chrom, chromStart, and chromEnd). This means other tab delimited formats that follow the same conventions are also compatabile with `build_bundle.jl`. This includes the narrowPeak format produced by MACS2 and other peak calling software.
