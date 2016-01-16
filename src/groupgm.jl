@@ -65,8 +65,14 @@ function parse_config(stream, fileRoot)
         obj = Dict()
         if ismatch(r".*\.bam$", parts[1])
             obj["fileType"] = "bam"
-        elseif ismatch(r".*\.bed(\.gz)?$", parts[1])
+        elseif ismatch(r".*\.bed$", parts[1])
             obj["fileType"] = "bed"
+        elseif ismatch(r".*\.bed\.gz$", parts[1])
+            obj["fileType"] = "bed.gz"
+        elseif ismatch(r".*\.narrowPeak$", parts[1])
+            obj["fileType"] = "narrowPeak"
+        elseif ismatch(r".*\.narrowPeak\.gz$", parts[1])
+            obj["fileType"] = "narrowPeak.gz"
         else
             obj["fileType"] = "unknown"
         end
@@ -159,7 +165,7 @@ function build_network(G, groups, metadata; threshold=0.2, groupScoreThreshold=0
             if (abs(G[i,j]) > threshold && searchindex(groups[i][2], groups[j][2]) == 0
                 && searchindex(groups[j][2], groups[i][2]) == 0
                 && groups[i][1] < 1-groupScoreThreshold && groups[j][1] < 1-groupScoreThreshold)
-                
+
                 d = Dict{Any,Any}(
                     "source" => i-1,
                     "target" => j-1,
