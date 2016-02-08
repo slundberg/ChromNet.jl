@@ -30,8 +30,6 @@ args = parse_args(s)
 using ChromNet
 using JSON
 using JLD
-using SamIO
-using ProgressMeter
 
 # open the data bundle and load the metadata
 dataBundles = [jldopen(x) for x in args["data_bundles"]]
@@ -40,7 +38,6 @@ for bundle in dataBundles
     metadata = merge(metadata, read(bundle, "metadata"))
 end
 ids = vcat([read(bundle, "ids") for bundle in dataBundles]...)
-numBins = round(Int, ceil(sum(ReferenceContigs_hg38.sizes) / 1000))
 
 # compute the joint correlation matrix
 C = streaming_cor(dataBundles, quiet=args["quiet"])
