@@ -3,6 +3,7 @@ export build_groups, build_groupgm, parse_config, build_network
 using Clustering
 using GZip
 
+"Build GroupGM groups from a correlation matrix and a set of ids."
 function build_groups(C, header)
 
     # force C to be perfectly symmetric (rounding errors make hclust unhappy)
@@ -34,6 +35,7 @@ function build_groups(C, header)
     groups
 end
 
+"Build a GroupGM score matrix form an inverse correlation matrix and the given groups."
 function build_groupgm(I, header, groups; combiner=sum)
 
     # create a dense array and a map to its indexes
@@ -92,7 +94,7 @@ function parse_config(stream, fileRoot)
     metadata
 end
 
-
+"Build a network from a GroupGM matrix, groups, and metadata."
 function build_network(G, groups, metadata; threshold=0.2, groupScoreThreshold=0.7, quiet=false)
 
     function find_parent(groups, id, ind)
