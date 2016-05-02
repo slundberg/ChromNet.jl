@@ -1,7 +1,7 @@
 
 # ChromNet.jl
 
-Integrates any BAM, BED, or narrowPeak file into the ChromNet group graphical model, the JSON network file produced can then be explored using http://chromnet.cs.washington.edu. The genomic context driving any group edge in the network can also be calculated. Details are available in our paper pre-print http://dx.doi.org/10.1101/023911.
+Integrates any BAM, BED, or narrowPeak file into the ChromNet group graphical model, the JSON network file produced can then be explored using http://chromnet.cs.washington.edu. The genomic context driving any group edge in the network can also be calculated. Details are available in our paper at http://www.genomebiology.com/2016/17/1/82.
 
 [![Build Status](https://travis-ci.org/slundberg/ChromNet.jl.svg?branch=master)](https://travis-ci.org/slundberg/ChromNet.jl)
 
@@ -12,7 +12,7 @@ Integrates any BAM, BED, or narrowPeak file into the ChromNet group graphical mo
 - Download the [current data package](https://drive.google.com/uc?export=download&id=0B8QcnMD1YRTXRnJFVy1BSkw0bW8) (currently at build 3) which contains the ChromNet processed version of all ENCODE ChIP-seq data. Also contained in this package is a Julia script, which when run, will generate a new ChromNet model using the ENCODE data and any user-provided BAM/BED files.
 
 #### Upgrading
-If you have already used ChromNet before, ensure you have the latest data package, and then run `Pkg.update()` in the Julia console to fetch any code updates. In a UNIX shell this can be done with one command:
+If you have already used ChromNet before, ensure you have the latest data package, and then run `Pkg.update()` in the Julia console to fetch any code updates. In a UNIX shell code updates can be fetched with:
 ```shell
 julia -e 'Pkg.update()'
 ```
