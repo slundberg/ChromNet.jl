@@ -34,7 +34,16 @@ using JLD
 # open the data bundle and load the metadata
 dataBundles = [jldopen(x) for x in args["data_bundles"]]
 metadata = Dict()
+lastAssembly = nothing
 for bundle in dataBundles
+
+    # ensure all the assemblies match
+    a = JLD.exists(bundle, "assembly") ? read(bundle, "assembly") : "GRCh38_alt"
+    if lastAssembly != nothing
+        @assert lastAssembly == a "Assemby mismatch! ("*lastAssembly*", $a)"
+    end
+    lastAssembly = a
+
     metadata = merge(metadata, read(bundle, "metadata"))
 end
 ids = vcat([read(bundle, "ids") for bundle in dataBundles]...)

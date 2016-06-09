@@ -7,11 +7,15 @@ s = ArgParseSettings()
         required = true
     "input_config"
         help = "File listing which external data files to integrate into the network. These can be"*
-               "either BAM files or BED files using hg38 coordinates."*
+               "either BAM files or BED files."*
                "For each line trailing fields may be omitted and follow the tab separated format: "*
                "FILE_NAME SHORT_TITLE LONG_TITLE CELL_TYPE LAB EXPERIMENT_ID ANTIBODY_ID TREATMENTS ORGANISM LIFE_STAGE LINK"
         arg_type = ASCIIString
         required = true
+    "--assembly"
+        help = "Which assembly genome coordinates are in (currently GRCh38, GRCh38_alt, hg19, mm10, mm9)."
+        arg_type = ASCIIString
+        default = "GRCh38_alt"
     "--quiet", "-q"
         help = "Don't print anything"
         action = :store_true
@@ -57,12 +61,14 @@ for (k,v) in metadata
     push!(ids, k)
 end
 
+referenceContigs = SamIO.assemby[args["assembly"]]
+
 # build the custom data matrix
-numBins = ceil(Int64, sum(ReferenceContigs_hg38.sizes) / 1000)
+numBins = ceil(Int64, sum(referenceContigs.sizes) / 1000)
 data = zeros(Float32, length(ids), numBins)
 @showprogress "Binning BAM/BED files: " for i in 1:length(ids)
     if fileTypes[i] == "bed" || fileTypes[i] == "narrowPeak"
-        reader = BinningMap(BedReader(fileNames[i], ReferenceContigs_hg38), 1000)
+        reader = BinningMap(BedReader(fileNames[i], referenceContigs), 1000)
         while !eof(reader)
             data[i,position(reader)] = value(reader)
             advance!(reader)
@@ -71,7 +77,7 @@ data = zeros(Float32, length(ids), numBins)
 
     elseif fileTypes[i] == "bed.gz" || fileTypes[i] == "narrowPeak.gz"
         f = GZip.open(fileNames[i])
-        reader = BinningMap(BedReader(f, ReferenceContigs_hg38), 1000)
+        reader = BinningMap(BedReader(f, referenceContigs), 1000)
         while !eof(reader)
             data[i,position(reader)] = value(reader)
             advance!(reader)
@@ -79,7 +85,7 @@ data = zeros(Float32, length(ids), numBins)
         close(reader)
 
     elseif fileTypes[i] == "bam"
-        reader = BinningMap(BamReader(fileNames[i], :any, ReferenceContigs_hg38), 1000)
+        reader = BinningMap(BamReader(fileNames[i], :any, referenceContigs), 1000)
         while !eof(reader)
             data[i,position(reader)] = value(reader)
             advance!(reader)
@@ -103,4 +109,5 @@ jldopen(outputFile, "w") do f
     f["P"] = length(ids)
     f["N"] = size(data)[2]
     f["metadata"] = metadata
+    f["assembly"] = args["assembly"]
 end
