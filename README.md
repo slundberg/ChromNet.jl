@@ -29,7 +29,7 @@ To build a network from custom data, a custom data bundle must be generated. To 
 julia build_bundle.jl CONFIG_FILE -o custom_bundle_name.ChromNet.jld
 ```
 
-The config file lists custom BAM/BED files to be incorporated into the network. **Note all BAM and BED files must be aligned to hg38.** Each line of the config file should conform to the following TAB separated format, where trailing entries can be omitted:
+The config file lists custom BAM/BED files to be incorporated into the network. Note all BAM and BED files must be aligned to GRCh38 or the `--assembly` option must be specified (see julia build_bundle.jl --help for available reference assemblies). Each line of the config file should conform to the following TAB separated format, where trailing entries can be omitted:
 
 ```
 FILE_NAME SHORT_TITLE LONG_TITLE CELL_TYPE LAB EXPERIMENT_ID ANTIBODY_ID TREATMENTS ORGANISM LIFE_STAGE LINK
