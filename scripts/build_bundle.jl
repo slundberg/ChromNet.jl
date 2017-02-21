@@ -61,7 +61,7 @@ for (k,v) in metadata
     push!(ids, k)
 end
 
-referenceContigs = SamIO.assemby[args["assembly"]]
+referenceContigs = SamIO.assembly[args["assembly"]]
 
 # build the custom data matrix
 numBins = ceil(Int64, sum(referenceContigs.sizes) / 1000)
