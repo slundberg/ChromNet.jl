@@ -38,7 +38,7 @@ FILE_NAME SHORT_TITLE LONG_TITLE CELL_TYPE LAB EXPERIMENT_ID ANTIBODY_ID TREATME
 The simplest configuration file is just a list of file names, and `build_bundle.jl` supports STDIN and STDOUT streaming. This means a one line invocation on UNIX systems is simply (where '-' denotes STDIN):
 
 ```shell
-ls ~/my_bed_files/*.bam | julia build_bundle.jl - > custom_bundle_name
+ls ~/my_bed_files/*.bam | julia build_bundle.jl custom_bundle_name -
 ```
 
 ### Build a custom network
