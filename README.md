@@ -46,7 +46,7 @@ ls ~/my_bed_files/*.bam | julia build_bundle.jl custom_bundle_name -
 Given a set of data bundles a single ChromNet network that incorperates data from all bundles can be generated using the following command:
 
 ```bash
-julia build_network.jl custom_bundle_name.ChromNet.jld ChromNet_human_build3.ChromNet.jld > network.json
+julia build_network.jl custom_bundle_name.ChromNet.jld ENCODE_human_build3.ChromNet.jld > network.json
 ```
 
 The output JSON file can then be dropped into the ChromNet interface at http://chromnet.cs.washington.edu.
@@ -56,7 +56,7 @@ The output JSON file can then be dropped into the ChromNet interface at http://c
 To calculate the genomic context driving a specific group edge you can use the following command:
 
 ```bash
-julia compute_edge_context.jl ENCSR000DMA|ENCSR000EGM ENCSR000BGX custom_bundle_name.ChromNet.jld ChromNet_human_build3.ChromNet.jld > out.bed
+julia compute_edge_context.jl ENCSR000DMA|ENCSR000EGM ENCSR000BGX custom_bundle_name.ChromNet.jld ENCODE_human_build3.ChromNet.jld > out.bed
 ```
 
 ## BED format
