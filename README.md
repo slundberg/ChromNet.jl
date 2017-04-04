@@ -21,6 +21,15 @@ julia -e 'Pkg.update()'
 
 Below are examples of basic usage for each command. Running each command with the `--help` option will give more detailed documentation.
 
+### Build sorted BAM file aligned to hg38
+
+ChromNet expects sorted BAM files aligned to hg38. You can create these using the following commands:
+
+```shell
+zcat MY_EXP.fastq.gz | bowtie2 -p 20 -x /path/bowtie/hg38 -U - | samtools view -bS - | MY_EXP.unsorted.bam;
+samtools sort MY_EXP.unsorted.bam -o MY_EXP.sorted.bam -@ 10
+```
+
 ### Build a custom data bundle
 
 To build a network from custom data, a custom data bundle must be generated. To do this, decompress the downloaded data package and from inside the directory run:
