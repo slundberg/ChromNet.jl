@@ -30,8 +30,6 @@ zcat MY_EXP.fastq.gz | bowtie2 -p 20 -x /path/bowtie/hg38 -U - | samtools view -
 samtools sort MY_EXP.unsorted.bam -o MY_EXP.sorted.bam -@ 10
 ```
 
-To ensure th
-
 ### Build a custom data bundle
 
 To build a network from custom data, a custom data bundle must be generated. To do this, decompress the downloaded data package and from inside the directory run:
