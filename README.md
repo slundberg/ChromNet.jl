@@ -23,12 +23,14 @@ Below are examples of basic usage for each command. Running each command with th
 
 ### Build sorted BAM file aligned to hg38
 
-ChromNet expects sorted BAM files aligned to hg38. You can create these using the following commands:
+ChromNet expects sorted BAM files aligned to hg38. Use our provided [Bowtie index](https://drive.google.com/open?id=0B8QcnMD1YRTXSzVCUEhYMFREXzQ) to ensure your data matches the ChromNet pre-built encode data bundle. You can create these using the following commands:
 
 ```shell
 zcat MY_EXP.fastq.gz | bowtie2 -p 20 -x /path/bowtie/hg38 -U - | samtools view -bS - | MY_EXP.unsorted.bam;
 samtools sort MY_EXP.unsorted.bam -o MY_EXP.sorted.bam -@ 10
 ```
+
+To ensure th
 
 ### Build a custom data bundle
 
