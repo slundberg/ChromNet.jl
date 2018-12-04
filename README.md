@@ -8,7 +8,7 @@ Integrates any BAM, BED, or narrowPeak file into the ChromNet group graphical mo
 
 ## Installation
 
-- Ensure that a compatible version of [Julia](http://www.julialang.com/downloads/) is installed (v0.4 - v0.6). ChromNet is written in Julia for performance and portability reasons.
+- Ensure that a compatible version of [Julia](http://www.julialang.com/downloads/) is installed (v0.4 - v0.5). ChromNet is written in Julia for performance and portability reasons.
 - Download the [current data package](https://drive.google.com/uc?export=download&id=0B8QcnMD1YRTXRnJFVy1BSkw0bW8) (currently at build 3) which contains the ChromNet processed version of all ENCODE ChIP-seq data. Also contained in this package is a Julia script, which when run, will generate a new ChromNet model using the ENCODE data and any user-provided BAM/BED files.
 
 #### Upgrading
